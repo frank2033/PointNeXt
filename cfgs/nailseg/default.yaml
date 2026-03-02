@@ -1,0 +1,76 @@
+# ---------------------------------------------------------------------------- #
+# NailSeg Dataset Default Configuration
+# ---------------------------------------------------------------------------- #
+# Data format: each .npy file is (N, C) where first 3 cols are xyz,
+# last col is label (0=non_nail, 1=nail).
+# Directory structure: data/NailSeg/{train,val,test}/*.npy
+# ---------------------------------------------------------------------------- #
+
+dataset:
+  common:
+    NAME: NailSeg
+    data_root: data/NailSeg
+    num_points: 1024
+  train:
+    split: train
+  val:
+    split: val
+  test:
+    split: test
+
+num_classes: 2
+num_points: 1024
+feature_keys: pos,heights
+
+datatransforms:
+  train: [PointsToTensor, PointCloudScaling, PointCloudCenterAndNormalize, PointCloudJitter]
+  val: [PointsToTensor, PointCloudCenterAndNormalize]
+  kwargs:
+    jitter_sigma: 0.001
+    jitter_clip: 0.005
+    scale: [0.8, 1.2]
+    gravity_dim: 1
+
+batch_size: 16
+dataloader:
+  num_workers: 4
+
+# ---------------------------------------------------------------------------- #
+# Evaluation
+# ---------------------------------------------------------------------------- #
+num_votes: 0
+val_fn: validate
+
+# ---------------------------------------------------------------------------- #
+# Training
+# ---------------------------------------------------------------------------- #
+lr: 0.001
+min_lr: null
+optimizer:
+  NAME: adamw
+  weight_decay: 1.0e-4
+
+criterion_args:
+  NAME: CrossEntropy
+
+# Scheduler
+epochs: 200
+sched: cosine
+warmup_epochs: 10
+
+sched_on_epoch: True
+grad_norm_clip: 10
+
+cls_weighed_loss: False
+
+# ---------------------------------------------------------------------------- #
+# IO and misc
+# ---------------------------------------------------------------------------- #
+print_freq: 10
+val_freq: 1
+save_freq: -1
+
+pretrained_path: null
+
+wandb:
+  project: NailSeg

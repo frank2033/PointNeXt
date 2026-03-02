@@ -1,0 +1,22 @@
+# ---------------------------------------------------------------------------- #
+# PointNet for NailSeg fingernail segmentation
+# ---------------------------------------------------------------------------- #
+model:
+  NAME: BaseSeg
+  encoder_args:
+    NAME: PointNetEncoder
+    in_channels: 4
+    is_seg: True
+  cls_args:
+    NAME: SegHead
+    num_classes: 2
+    mlps: [512, 256, 128]
+
+datatransforms:
+  train: [PointsToTensor, PointCloudScaling, PointCloudCenterAndNormalize, PointCloudJitter]
+  val: [PointsToTensor, PointCloudCenterAndNormalize]
+  kwargs:
+    jitter_sigma: 0.001
+    jitter_clip: 0.005
+    scale: [0.8, 1.2]
+    gravity_dim: 1
