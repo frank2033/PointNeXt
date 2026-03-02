@@ -23,7 +23,6 @@ If C == 4, no additional features are used (xyz + label only).
 If C > 4, columns 3 to C-2 are treated as point features.
 """
 import os
-import glob
 import logging
 import numpy as np
 import torch
@@ -66,10 +65,19 @@ class NailSeg(Dataset):
                 f"Please organize your data as: {data_root}/{{train,val,test}}/*.npy"
             )
 
-        self.file_list = sorted(glob.glob(os.path.join(split_dir, '*.npy')))
+        self.file_list = []
+        for fname in sorted(os.listdir(split_dir)):
+            if fname.endswith('.npy') and not fname.startswith('._'):
+                full_path = os.path.join(split_dir, fname)
+                try:
+                    with open(full_path, 'rb') as f:
+                        f.read(10)
+                    self.file_list.append(full_path)
+                except Exception as e:
+                    logging.warning(f"Skipping unreadable file: {full_path}, error: {e}")
         if len(self.file_list) == 0:
             raise FileNotFoundError(
-                f"No .npy files found in {split_dir}."
+                f"No valid .npy files found in {split_dir}."
             )
 
         logging.info(f"NailSeg [{split}]: loaded {len(self.file_list)} samples from {split_dir}")
