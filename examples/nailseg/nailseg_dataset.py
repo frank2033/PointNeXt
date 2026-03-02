@@ -70,6 +70,7 @@ class NailSeg(Dataset):
             if fname.endswith('.npy') and not fname.startswith('._'):
                 full_path = os.path.join(split_dir, fname)
                 try:
+                    # Quick file accessibility check (not full format validation)
                     with open(full_path, 'rb') as f:
                         f.read(10)
                     self.file_list.append(full_path)

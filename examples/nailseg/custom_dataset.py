@@ -65,6 +65,7 @@ class CustomDataset(data.Dataset):
             if filename.endswith('.npy') and not filename.startswith('._'):
                 full_path = os.path.join(split_dir, filename)
                 try:
+                    # Quick file accessibility check (not full format validation)
                     with open(full_path, 'rb') as f:
                         f.read(10)
                     self.datapath.append(full_path)
@@ -126,6 +127,7 @@ class CustomDataset(data.Dataset):
         seg = torch.from_numpy(seg.astype(np.int64))
 
         if self.classification:
+            # Assumes all points in this cloud share the same class label
             cls = seg[0]
             return points, cls
         else:
