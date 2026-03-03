@@ -5,7 +5,7 @@ model:
   NAME: BasePartSeg
   encoder_args:
     NAME: PointNet2Encoder
-    in_channels: 7   # xyz(3) + features(3) + heights(1)
+    in_channels: 7   # pos(3) + x(3) + heights(1, added by transform)
     width: null
     strides: [1, 2, 2, 2]
     layers: 3
