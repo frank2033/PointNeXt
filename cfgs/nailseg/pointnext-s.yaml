@@ -1,0 +1,55 @@
+# ---------------------------------------------------------------------------- #
+# PointNeXt-S for NailSeg fingernail segmentation
+# ---------------------------------------------------------------------------- #
+# This is the base PointNeXt model. You can modify the following for your
+# thesis experiments:
+#   - blocks: number of InvResMLP blocks per stage
+#   - strides: downsampling ratio per stage
+#   - width: base channel width
+#   - sa_layers: number of set abstraction layers
+#   - expansion: expansion ratio of InvResMLP
+#   - radius / nsample: ball query radius and number of neighbors
+#   - aggr_args.feature_type: feature aggregation type ('dp_fj', 'fj', 'dp')
+# ---------------------------------------------------------------------------- #
+model:
+  NAME: BaseSeg
+  encoder_args:
+    NAME: PointNextEncoder
+    blocks: [1, 1, 1, 1, 1]
+    strides: [1, 4, 4, 4, 4]
+    sa_layers: 2
+    sa_use_res: True
+    width: 32
+    in_channels: 4
+    expansion: 4
+    radius: 0.1
+    nsample: 32
+    aggr_args:
+      feature_type: 'dp_fj'
+      reduction: 'max'
+    group_args:
+      NAME: 'ballquery'
+      normalize_dp: True
+    conv_args:
+      order: conv-norm-act
+    act_args:
+      act: 'relu'
+    norm_args:
+      norm: 'bn'
+  decoder_args:
+    NAME: PointNextDecoder
+  cls_args:
+    NAME: SegHead
+    num_classes: 2
+    in_channels: null
+    norm_args:
+      norm: 'bn'
+
+datatransforms:
+  train: [PointsToTensor, PointCloudScaling, PointCloudCenterAndNormalize, PointCloudJitter]
+  val: [PointsToTensor, PointCloudCenterAndNormalize]
+  kwargs:
+    jitter_sigma: 0.001
+    jitter_clip: 0.005
+    scale: [0.8, 1.2]
+    gravity_dim: 1
