@@ -40,6 +40,10 @@ from openpoints.models.layers import furthest_point_sample
 # Register NailSeg dataset so build_dataloader_from_cfg can find it
 from nailseg_dataset import NailSeg
 
+# Register improved encoder variants for ablation experiments
+from pointnext_improved import (  # noqa: F401
+    PointNextEncoderMSCA, PointNextEncoderCSWAP, PointNextEncoderImproved)
+
 
 def batched_bincount(x, dim, max_value):
     target = torch.zeros(x.shape[0], max_value, dtype=x.dtype, device=x.device)
