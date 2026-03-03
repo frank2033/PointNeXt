@@ -123,6 +123,7 @@ def estimate_curvature(pos, dp):
     dp_norm = dp.norm(dim=1, keepdim=True)  # (B, 1, N, K)
     dp_mean = dp_norm.mean(dim=-1, keepdim=True)  # (B, 1, N, 1)
     deviation = (dp_norm - dp_mean).abs()  # (B, 1, N, K)
+    # Broadcasting: curvature (B,1,N,1) + deviation (B,1,N,K) -> (B,1,N,K)
     weight = curvature + deviation  # (B, 1, N, K)
     return weight
 
