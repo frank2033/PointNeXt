@@ -1,0 +1,69 @@
+# PointNeXt-S for NailSeg binary part segmentation
+# Usage: python examples/nailseg/main.py --cfg cfgs/nailseg/pointnext-s.yaml
+
+model:
+  NAME: BasePartSeg
+  encoder_args:
+    NAME: PointNextEncoder
+    blocks: [1, 1, 1, 1, 1]
+    strides: [1, 2, 2, 2, 2]
+    width: 32
+    in_channels: 7   # pos(3) + x(3) + heights(1, added by transform)
+    sa_layers: 3
+    sa_use_res: True
+    radius: 0.1
+    radius_scaling: 2.5
+    nsample: 32
+    expansion: 4
+    aggr_args:
+      feature_type: 'dp_fj'
+    reduction: 'max'
+    group_args:
+      NAME: 'ballquery'
+      normalize_dp: True
+    conv_args:
+      order: conv-norm-act
+    act_args:
+      act: 'relu'
+    norm_args:
+      norm: 'bn'
+  decoder_args:
+    NAME: PointNextPartDecoder
+    cls_map: curvenet
+  cls_args:
+    NAME: SegHead
+    global_feat: max,avg
+    num_classes: 2
+    in_channels: null
+    norm_args:
+      norm: 'bn'
+
+# ---------------------------------------------------------------------------- #
+# Training cfgs
+# ---------------------------------------------------------------------------- #
+lr: 0.001
+min_lr: null
+optimizer:
+  NAME: adamw
+  weight_decay: 1.0e-4
+
+criterion_args:
+  NAME: Poly1FocalLoss
+
+# scheduler
+epochs: 300
+sched: multistep
+decay_epochs: [210, 270]
+decay_rate: 0.1
+warmup_epochs: 0
+
+datatransforms:
+  train: [PointsToTensor, PointCloudScaling, PointCloudCenterAndNormalize, PointCloudJitter, ChromaticDropGPU]
+  val: [PointsToTensor, PointCloudCenterAndNormalize]
+  vote: [PointCloudScaling]
+  kwargs:
+    jitter_sigma: 0.001
+    jitter_clip: 0.005
+    scale: [0.8, 1.2]
+    gravity_dim: 1
+    angle: [0, 1.0, 0]

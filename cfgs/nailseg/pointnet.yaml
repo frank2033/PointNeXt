@@ -1,0 +1,24 @@
+# PointNet for NailSeg binary part segmentation
+# Usage: python examples/nailseg/main.py --cfg cfgs/nailseg/pointnet.yaml
+
+model:
+  NAME: BaseSeg
+  encoder_args:
+    NAME: PointNetEncoder
+    in_channels: 7   # pos(3) + x(3) + heights(1, added by transform)
+    is_seg: True
+  cls_args:
+    NAME: SegHead
+    num_classes: 2
+    mlps: [512, 256, 128, 128]
+
+datatransforms:
+  train: [PointsToTensor, PointCloudScaling, PointCloudCenterAndNormalize, PointCloudJitter, ChromaticDropGPU]
+  val: [PointsToTensor, PointCloudCenterAndNormalize]
+  vote: [PointCloudScaling]
+  kwargs:
+    jitter_sigma: 0.001
+    jitter_clip: 0.005
+    scale: [0.8, 1.2]
+    gravity_dim: 1
+    angle: [0, 1.0, 0]
