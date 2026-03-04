@@ -209,7 +209,9 @@ def main(gpu, cfg):
             logging.info('`num_per_class` attribute is not founded in dataset')
     criterion = build_criterion_from_cfg(cfg.criterion_args).cuda()
     # ===> start training
+    val_ins_miou, val_cls_miou = 0., 0.
     best_ins_miou, cls_miou_when_best, cls_mious_when_best = 0., 0., []
+    best_epoch = cfg.start_epoch
     for epoch in range(cfg.start_epoch, cfg.epochs + 1):
         if cfg.distributed:
             train_loader.sampler.set_epoch(epoch)
@@ -277,8 +279,10 @@ def main(gpu, cfg):
     torch.cuda.synchronize()
     if writer is not None:
         writer.close()
-    dist.destroy_process_group()
-    wandb.finish(exit_code=True)
+    if cfg.distributed:
+        dist.destroy_process_group()
+    if cfg.rank == 0 and cfg.wandb.get('use_wandb', False):
+        wandb.finish(exit_code=True)
 
 
 def train_one_epoch(model, train_loader, criterion, optimizer, scheduler, epoch, cfg):
